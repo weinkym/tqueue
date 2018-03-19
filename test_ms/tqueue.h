@@ -24,8 +24,6 @@ private:
     size_t read_position;
     size_t write_position;
     pthread_mutex_t cond_mutex;
-    pthread_mutex_t produce_mutex;
-    pthread_mutex_t consume_mutex;
     pthread_cond_t  cond1;
     pthread_cond_t  cond2;
 };
@@ -61,51 +59,48 @@ TQueue<T>::~TQueue()
 template<class T>
 void TQueue<T>::produceData(const T &data)
 {
-    printf("LINE=%d\n",__LINE__);
-    pthread_mutex_lock(&produce_mutex);
-    qDebug()<<QString("QLINE=%1").arg(__LINE__);
+//    printf("LINE=%d\n",__LINE__);
+//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
+
+    pthread_mutex_lock(&cond_mutex);
     while (((write_position + 1) % m_maxsize) == read_position)
     {
         {
-            pthread_mutex_lock(&cond_mutex);
-            printf("LINE=%d\n",__LINE__);
-            qDebug()<<QString("QLINE=%1").arg(__LINE__);
+//            printf("LINE=%d\n",__LINE__);
+//            qDebug()<<QString("QLINE=%1").arg(__LINE__);
             pthread_cond_wait(&cond1,&cond_mutex); // 生产者等待"产品库缓冲区不为满"这一条件发生.
-            qDebug()<<QString("QLINE=%1").arg(__LINE__);
-            pthread_mutex_unlock(&cond_mutex); // 解锁
+//            qDebug()<<QString("QLINE=%1").arg(__LINE__);
         }
     }
+//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     m_datas[write_position] = data;
+//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     write_position++;
     write_position = write_position % m_maxsize;
     pthread_cond_signal(&cond2);
-    qDebug()<<QString("QLINE=%1").arg(__LINE__);
-    printf("LINE=%d\n",__LINE__);
-    pthread_mutex_unlock(&produce_mutex);
+    pthread_mutex_unlock(&cond_mutex); // 解锁
 }
 
 template<class T>
 T TQueue<T>::consumeData()
 {
-    printf("LINE=%d\n",__LINE__);
-    pthread_mutex_lock(&consume_mutex);
-    qDebug()<<QString("QLINE=%1").arg(__LINE__);
+//    printf("LINE=%d\n",__LINE__);
+//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
+    pthread_mutex_lock(&cond_mutex);
     while (this->write_position == this->read_position)
     {
-        pthread_mutex_lock(&cond_mutex);
-        printf("LINE=%d\n",__LINE__);
-        qDebug()<<QString("QLINE=%1").arg(__LINE__);
+//        printf("LINE=%d\n",__LINE__);
+//        qDebug()<<QString("QLINE=%1").arg(__LINE__);
         pthread_cond_wait(&cond2,&cond_mutex); // 生产者等待"产品库缓冲区不为满"这一条件发生.
-        qDebug()<<QString("QLINE=%1").arg(__LINE__);
-        pthread_mutex_unlock(&cond_mutex); // 解锁
+//        qDebug()<<QString("QLINE=%1").arg(__LINE__);
     }
     T data = m_datas[read_position]; // 读取某一产品
     read_position++; // 读取位置后移
     read_position = read_position % m_maxsize;
     pthread_cond_signal(&cond1);
-    printf("LINE=%d\n",__LINE__);
-    qDebug()<<QString("QLINE=%1").arg(__LINE__);
-    pthread_mutex_unlock(&consume_mutex);
+//    printf("LINE=%d\n",__LINE__);
+//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
+    pthread_mutex_unlock(&cond_mutex); // 解锁
 
     return data;
 }

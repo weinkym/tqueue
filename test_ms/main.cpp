@@ -3,13 +3,14 @@
 #include "tqueue.h"
 #include <unistd.h>
 #include <stdio.h>
-
-const int T_ALPHANUMERIC_COUNT = 62;
 #include <sys/select.h>
 
+const int T_ALPHANUMERIC_COUNT = 62;
+
 char g_alphanumeric_array[T_ALPHANUMERIC_COUNT];
-const int T_MAX_LENGTH = 155;
+const int T_MAX_LENGTH = 12;
 TQueue<char> *p;
+int g_finished_count = 0;
 
 static void sleep_ms(unsigned int secs)
 
@@ -54,34 +55,43 @@ void sord(char *a,int m)
 
 void product()
 {
-    for(int i = 0; i < T_MAX_LENGTH;++i)
+    /*异步取消， 线程接到取消信号后，立即退出*/
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+//    for(int i = 0; i < T_MAX_LENGTH;++i)
+    while(true)
     {
 //        sleep_ms(100);
         p->produceData(createAlphanumeric());
     }
-    printf("product end\n");
+//    printf("product end\n");
 }
 
 void custom()
 {
+    /*异步取消， 线程接到取消信号后，立即退出*/
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     char *datas = new char[T_MAX_LENGTH];
-    for(int i = 0; i < T_MAX_LENGTH;++i)
+    while(true)
     {
-        datas[i] = p->consumeData();
+        for(int i = 0; i < T_MAX_LENGTH;++i)
+        {
+            datas[i] = p->consumeData();
+        }
+        sord(datas,T_MAX_LENGTH);
+        g_finished_count++;
     }
 //
-    sord(datas,T_MAX_LENGTH);
-    QString text;
-    for(int i = 0; i < T_MAX_LENGTH;++i)
-    {
+//    QString text;
+//    for(int i = 0; i < T_MAX_LENGTH;++i)
+//    {
 //        printf("%c",datas[i]);
-        text.append(datas[i]);
-    }
+//        text.append(datas[i]);
+//    }
 //    printf("custom end\n");
-    qDebug()<<"==========";
-    qDebug()<<text;
-    qDebug()<<"==========";
-    pthread_exit(0);
+//    qDebug()<<"==========";
+//    qDebug()<<text;
+//    qDebug()<<"==========";
+//    pthread_exit(0);
 }
 
 void doTest()
@@ -120,17 +130,31 @@ int main(int argc, char *argv[])
     p = new TQueue<char>(12);
 
     pthread_t product_thread;
-    pthread_t product_thread2;
+//    pthread_t product_thread2;
     pthread_t custom_thread;
-    pthread_create(&product_thread2, NULL, (void *(*)(void*))product,NULL);
+//    pthread_create(&product_thread2, NULL, (void *(*)(void*))product,NULL);
     pthread_create(&product_thread, NULL, (void *(*)(void*))product,NULL);
     pthread_create(&custom_thread, NULL, (void *(*)(void*))custom,NULL);
-    pthread_join(custom_thread,NULL);
+//    pthread_join(custom_thread,NULL);
 //    delete p;
 //    p = NULL;
 //    return a.exec();
-//    while(true)
-//    {
-//        sleep_ms(10);
-//    }
+    //    while(true)
+    //    {
+    //        sleep_ms(10);
+    //    }
+    sleep_ms(10000);
+    pthread_cancel(custom_thread);
+    pthread_cancel(product_thread);
+//    pthread_join(custom_thread, NULL);
+//    pthread_join(product_thread, NULL);
+
+//    pthread_mutex_destroy(&(p->cond_mutex));
+//    pthread_cond_destroy(&(p->cond1));
+//    pthread_cond_destroy(&(p->cond2));
+
+//    pthread_exit(NULL);
+    printf("TTTTTV:count=%d\n",g_finished_count);
+    qDebug()<<"g_finished_count "<<g_finished_count;
+    return 0;
 }
