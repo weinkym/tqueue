@@ -5,7 +5,6 @@
 #include <mutex>
 #include <stdio.h>
 #include <iostream>
-#include <QDebug>
 
 const int T_MAX_QUEUE_LENGTH = 12;
 

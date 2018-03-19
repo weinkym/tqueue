@@ -1,5 +1,3 @@
-#include "mainwindow.h"
-#include <QApplication>
 #include "tqueue.h"
 #include <unistd.h>
 #include <stdio.h>
@@ -82,9 +80,20 @@ void custom()
     }
 }
 
-void doTest()
+void testCharSort()
 {
-
+    /*异步取消， 线程接到取消信号后，立即退出*/
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    char *datas = new char[T_MAX_LENGTH];
+    while(true)
+    {
+        for(int i = 0; i < T_MAX_LENGTH;++i)
+        {
+            datas[i] = createAlphanumeric();
+        }
+        sord(datas,T_MAX_LENGTH);
+        g_finished_count++;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -105,29 +114,36 @@ int main(int argc, char *argv[])
     int test_sces = 1;
     if(argc > 1)
     {
-        test_sces = atoi(argc[1]);
+        test_sces = atoi(argv[1]);
+    }
+    if(test_sces <= 0)
+    {
+        test_sces = 1;
     }
     printf("test_sces=%d\n",test_sces);
     srand((unsigned)time(NULL));
     p = new TQueue<char>(12);
 
+#ifdef TEST_QUEUE
     pthread_t product_thread;
-//    pthread_t product_thread2;
     pthread_t custom_thread;
-//    pthread_create(&product_thread2, NULL, (void *(*)(void*))product,NULL);
     pthread_create(&product_thread, NULL, (void *(*)(void*))product,NULL);
     pthread_create(&custom_thread, NULL, (void *(*)(void*))custom,NULL);
+#else
+    pthread_t test_thread;
+    pthread_create(&test_thread, NULL, (void *(*)(void*))testCharSort,NULL);
+#endif
+
 //    pthread_join(custom_thread,NULL);
-//    delete p;
-//    p = NULL;
-//    return a.exec();
-    //    while(true)
-    //    {
-    //        sleep_ms(10);
-    //    }
+
     sleep(test_sces);
+#ifdef TEST_QUEUE
     pthread_cancel(custom_thread);
     pthread_cancel(product_thread);
+#else
+    pthread_cancel(test_thread);
+#endif
+
     printf("test_sces=%ds,finished_count=%d\n",test_sces,g_finished_count);
     return 0;
 }

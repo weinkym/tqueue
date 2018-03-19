@@ -3,10 +3,11 @@
 # Project created by QtCreator 2018-03-18T19:06:08
 #
 #-------------------------------------------------
+QT -= core
+QT -= gui
+#QT       += core gui
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = test_ms
 TEMPLATE = app
@@ -24,10 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
     tqueue.cpp
 
-HEADERS  += mainwindow.h \
-    tqueue.h
+HEADERS  += tqueue.h
 
-FORMS    += mainwindow.ui
