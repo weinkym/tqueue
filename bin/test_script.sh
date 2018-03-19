@@ -2,13 +2,28 @@ basepath=$(cd `dirname $0`; pwd)
 echo basepath=${basepath}
 cd ${basepath}
 
-IN_REPEAT_TIMES=2
+CHECK_FILE_PATH_LIST+=(${basepath}/program1)
+CHECK_FILE_PATH_LIST+=(${basepath}/program2)
+
+P_CHECK_PARAM=-f
+for P_CHECK_PATH in ${CHECK_FILE_PATH_LIST[@]}; do
+	if [ ! $P_CHECK_PARAM "$P_CHECK_PATH" ]; then
+		echo "$P_CHECK_PATH is not exist"
+		exit
+	else
+		echo "$P_CHECK_PATH is ok"
+	fi
+done
+
 #程序运行的时间
 
 # IN_PROGRAM1_NAME=program1
 # IN_PROGRAM2_NAME=program2
 # IN_PROGRAM_NAME_LIST+=(program1)
 # IN_PROGRAM_NAME_LIST+=(program2)
+
+#重复测试次数
+IN_REPEAT_TIMES=10
 
 #测试时间，单位：秒
 IN_TEST_SECS_LIST+=(1)
