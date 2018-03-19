@@ -80,18 +80,6 @@ void custom()
         sord(datas,T_MAX_LENGTH);
         g_finished_count++;
     }
-//
-//    QString text;
-//    for(int i = 0; i < T_MAX_LENGTH;++i)
-//    {
-//        printf("%c",datas[i]);
-//        text.append(datas[i]);
-//    }
-//    printf("custom end\n");
-//    qDebug()<<"==========";
-//    qDebug()<<text;
-//    qDebug()<<"==========";
-//    pthread_exit(0);
 }
 
 void doTest()
@@ -114,18 +102,12 @@ int main(int argc, char *argv[])
     {
         g_alphanumeric_array[index++] = 'A'+ i;
     }
-//    for(int i = 0; i <T_MAX_LENGTH;++i)
-//    {
-//        printf("%c",createAlphanumeric());
-//    }
-//    printf("\n");
-//    return 0;
-//    QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
-
-//    return a.exec();
-//    printf("LINE=%d\n",__LINE__);
+    int test_sces = 1;
+    if(argc > 1)
+    {
+        test_sces = atoi(argc[1]);
+    }
+    printf("test_sces=%d\n",test_sces);
     srand((unsigned)time(NULL));
     p = new TQueue<char>(12);
 
@@ -143,18 +125,9 @@ int main(int argc, char *argv[])
     //    {
     //        sleep_ms(10);
     //    }
-    sleep_ms(10000);
+    sleep(test_sces);
     pthread_cancel(custom_thread);
     pthread_cancel(product_thread);
-//    pthread_join(custom_thread, NULL);
-//    pthread_join(product_thread, NULL);
-
-//    pthread_mutex_destroy(&(p->cond_mutex));
-//    pthread_cond_destroy(&(p->cond1));
-//    pthread_cond_destroy(&(p->cond2));
-
-//    pthread_exit(NULL);
-    printf("TTTTTV:count=%d\n",g_finished_count);
-    qDebug()<<"g_finished_count "<<g_finished_count;
+    printf("test_sces=%ds,finished_count=%d\n",test_sces,g_finished_count);
     return 0;
 }
