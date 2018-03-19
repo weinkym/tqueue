@@ -58,22 +58,13 @@ TQueue<T>::~TQueue()
 template<class T>
 void TQueue<T>::produceData(const T &data)
 {
-//    printf("LINE=%d\n",__LINE__);
-//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
-
     pthread_mutex_lock(&cond_mutex);
     while (((write_position + 1) % m_maxsize) == read_position)
     {
-        {
-//            printf("LINE=%d\n",__LINE__);
-//            qDebug()<<QString("QLINE=%1").arg(__LINE__);
-            pthread_cond_wait(&cond1,&cond_mutex); // 生产者等待"产品库缓冲区不为满"这一条件发生.
-//            qDebug()<<QString("QLINE=%1").arg(__LINE__);
-        }
+        //缓冲区满，等待消费
+        pthread_cond_wait(&cond1,&cond_mutex);
     }
-//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     m_datas[write_position] = data;
-//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     write_position++;
     write_position = write_position % m_maxsize;
     pthread_cond_signal(&cond2);
@@ -83,24 +74,17 @@ void TQueue<T>::produceData(const T &data)
 template<class T>
 T TQueue<T>::consumeData()
 {
-//    printf("LINE=%d\n",__LINE__);
-//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     pthread_mutex_lock(&cond_mutex);
     while (this->write_position == this->read_position)
     {
-//        printf("LINE=%d\n",__LINE__);
-//        qDebug()<<QString("QLINE=%1").arg(__LINE__);
-        pthread_cond_wait(&cond2,&cond_mutex); // 生产者等待"产品库缓冲区不为满"这一条件发生.
-//        qDebug()<<QString("QLINE=%1").arg(__LINE__);
+        //缓冲区为空，等待生产
+        pthread_cond_wait(&cond2,&cond_mutex);
     }
     T data = m_datas[read_position]; // 读取某一产品
     read_position++; // 读取位置后移
     read_position = read_position % m_maxsize;
     pthread_cond_signal(&cond1);
-//    printf("LINE=%d\n",__LINE__);
-//    qDebug()<<QString("QLINE=%1").arg(__LINE__);
     pthread_mutex_unlock(&cond_mutex); // 解锁
-
     return data;
 }
 

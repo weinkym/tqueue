@@ -10,20 +10,6 @@ const int T_MAX_LENGTH = 12;
 TQueue<char> *p;
 int g_finished_count = 0;
 
-static void sleep_ms(unsigned int secs)
-
-{
-
-    struct timeval tval;
-
-    tval.tv_sec=secs/1000;
-
-    tval.tv_usec=(secs*1000)%1000000;
-
-    select(0,NULL,NULL,NULL,&tval);
-
-}
-
 char createAlphanumeric()
 {
     int index = rand() % T_ALPHANUMERIC_COUNT;
@@ -32,7 +18,6 @@ char createAlphanumeric()
 
 void sord(char *a,int m)
 {
-//    int m = a.length();
     int n = m-1;
     for(int i=0 ; i < n; i++)
     {
@@ -55,13 +40,10 @@ void product()
 {
     /*异步取消， 线程接到取消信号后，立即退出*/
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-//    for(int i = 0; i < T_MAX_LENGTH;++i)
     while(true)
     {
-//        sleep_ms(100);
         p->produceData(createAlphanumeric());
     }
-//    printf("product end\n");
 }
 
 void custom()
@@ -120,11 +102,11 @@ int main(int argc, char *argv[])
     {
         test_sces = 1;
     }
-    printf("test_sces=%d\n",test_sces);
+//    printf("test_sces=%d\n",test_sces);
     srand((unsigned)time(NULL));
     p = new TQueue<char>(12);
 
-#ifdef TEST_QUEUE
+#ifdef USE_QUEUE
     pthread_t product_thread;
     pthread_t custom_thread;
     pthread_create(&product_thread, NULL, (void *(*)(void*))product,NULL);
@@ -137,13 +119,13 @@ int main(int argc, char *argv[])
 //    pthread_join(custom_thread,NULL);
 
     sleep(test_sces);
-#ifdef TEST_QUEUE
+#ifdef USE_QUEUE
     pthread_cancel(custom_thread);
     pthread_cancel(product_thread);
 #else
     pthread_cancel(test_thread);
 #endif
-
-    printf("test_sces=%ds,finished_count=%d\n",test_sces,g_finished_count);
+//    printf("test_sces=%ds,finished_count=%d\n",test_sces,g_finished_count);
+    printf("finished_count=%d\n",g_finished_count);
     return 0;
 }
