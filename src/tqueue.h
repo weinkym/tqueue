@@ -20,24 +20,24 @@ public:
 private:
     T* m_datas;
     size_t m_maxsize;
-    size_t read_position;
-    size_t write_position;
-    pthread_mutex_t cond_mutex;
-    pthread_cond_t  cond1;
-    pthread_cond_t  cond2;
+    size_t m_read_position;
+    size_t m_write_position;
+    pthread_mutex_t m_cond_mutex;
+    pthread_cond_t  m_produce_cond;
+    pthread_cond_t  m_consume_cond;
 };
 
 template<typename T>
 TQueue<T>::TQueue(size_t maxsize)
     :m_datas(NULL)
     ,m_maxsize(maxsize)
-    ,read_position(0)
-    ,write_position(0)
+    ,m_read_position(0)
+    ,m_write_position(0)
 
 {
-    pthread_mutex_init( &(this->cond_mutex), NULL );
-    pthread_cond_init( &(this->cond1), NULL );
-    pthread_cond_init( &(this->cond2), NULL );
+    pthread_mutex_init( &(this->m_cond_mutex), NULL );
+    pthread_cond_init( &(this->m_produce_cond), NULL );
+    pthread_cond_init( &(this->m_consume_cond), NULL );
     if(m_maxsize <= 0)
     {
         m_maxsize = 12;
@@ -58,33 +58,33 @@ TQueue<T>::~TQueue()
 template<class T>
 void TQueue<T>::produceData(const T &data)
 {
-    pthread_mutex_lock(&cond_mutex);
-    while (((write_position + 1) % m_maxsize) == read_position)
+    pthread_mutex_lock(&m_cond_mutex);
+    while (((m_write_position + 1) % m_maxsize) == m_read_position)
     {
         //缓冲区满，等待消费
-        pthread_cond_wait(&cond1,&cond_mutex);
+        pthread_cond_wait(&m_produce_cond,&m_cond_mutex);
     }
-    m_datas[write_position] = data;
-    write_position++;
-    write_position = write_position % m_maxsize;
-    pthread_cond_signal(&cond2);
-    pthread_mutex_unlock(&cond_mutex); // 解锁
+    m_datas[m_write_position] = data;
+    m_write_position++;
+    m_write_position = m_write_position % m_maxsize;
+    pthread_cond_signal(&m_consume_cond);
+    pthread_mutex_unlock(&m_cond_mutex); // 解锁
 }
 
 template<class T>
 T TQueue<T>::consumeData()
 {
-    pthread_mutex_lock(&cond_mutex);
-    while (this->write_position == this->read_position)
+    pthread_mutex_lock(&m_cond_mutex);
+    while (this->m_write_position == this->m_read_position)
     {
         //缓冲区为空，等待生产
-        pthread_cond_wait(&cond2,&cond_mutex);
+        pthread_cond_wait(&m_consume_cond,&m_cond_mutex);
     }
-    T data = m_datas[read_position]; // 读取某一产品
-    read_position++; // 读取位置后移
-    read_position = read_position % m_maxsize;
-    pthread_cond_signal(&cond1);
-    pthread_mutex_unlock(&cond_mutex); // 解锁
+    T data = m_datas[m_read_position]; // 读取一个数据
+    m_read_position++; // 读取位置后移
+    m_read_position = m_read_position % m_maxsize;
+    pthread_cond_signal(&m_produce_cond);
+    pthread_mutex_unlock(&m_cond_mutex); // 解锁
     return data;
 }
 
