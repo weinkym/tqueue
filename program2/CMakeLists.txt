@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 2.8)
 # 项目信息
 project (program2)
 
+ADD_DEFINITIONS(-std=c++11)
+
 aux_source_directory(../src/ DIR_SRCS)
 
 # 指定生成目标
