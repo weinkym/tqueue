@@ -2,6 +2,16 @@ basepath=$(cd `dirname $0`; pwd)
 echo basepath=${basepath}
 cd ${basepath}
 
+#重复测试次数
+IN_REPEAT_TIMES=30
+
+#测试时间，单位：秒
+IN_TEST_SECS_LIST+=(1)
+IN_TEST_SECS_LIST+=(5)
+IN_TEST_SECS_LIST+=(10)
+IN_TEST_SECS_LIST+=(30)
+IN_TEST_SECS_LIST+=(60)
+
 LOG_FILE_PATH=${basepath}/log.txt
 
 CHECK_FILE_PATH_LIST+=(${basepath}/program1)
@@ -18,25 +28,6 @@ for P_CHECK_PATH in ${CHECK_FILE_PATH_LIST[@]}; do
 		echo "$P_CHECK_PATH is ok" | tee -a ${LOG_FILE_PATH}
 	fi
 done
-
-
-#程序运行的时间
-
-# IN_PROGRAM1_NAME=program1
-# IN_PROGRAM2_NAME=program2
-# IN_PROGRAM_NAME_LIST+=(program1)
-# IN_PROGRAM_NAME_LIST+=(program2)
-
-#重复测试次数
-IN_REPEAT_TIMES=30
-
-#测试时间，单位：秒
-IN_TEST_SECS_LIST+=(1)
-IN_TEST_SECS_LIST+=(5)
-IN_TEST_SECS_LIST+=(10)
-IN_TEST_SECS_LIST+=(30)
-IN_TEST_SECS_LIST+=(60)
-IN_TEST_SECS_LIST+=(300)
 
 for secs in ${IN_TEST_SECS_LIST[@]}; do
 	result1=0

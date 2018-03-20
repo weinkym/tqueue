@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/select.h>
+#include <pthread.h>
 
 const int T_ALPHANUMERIC_COUNT = 62;
 
